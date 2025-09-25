@@ -1,16 +1,16 @@
 export default function Table({ items, onEdit, onDelete }) {
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-full border border-gray-200 rounded-lg overflow-hidden">
-        <thead className="bg-gray-100">
-          <tr>
-            <th className="px-4 py-2 border text-left">ID</th>
-            <th className="px-4 py-2 border text-left">Name</th>
-            <th className="px-4 py-2 border text-center">Stock</th>
-            <th className="px-4 py-2 border text-left">Barcode</th>
-            <th className="px-4 py-2 border text-left">Format</th>
-            <th className="px-4 py-2 border text-center">Actions</th>
-          </tr>
+      <table className="min-w-full table-auto">
+        <thead className="text-left text-sm text-gray-600 border-b">
+            <tr>
+            <th className="px-4 py-3">ID</th>
+            <th className="px-4 py-3">Name</th>
+            <th className="px-4 py-3 text-center">Stock</th>
+            <th className="px-4 py-3">Barcode</th>
+            <th className="px-4 py-3">Format</th>
+            <th className="px-4 py-3 text-center">Actions</th>
+            </tr>
         </thead>
         <tbody>
           {items.map((item) => (
