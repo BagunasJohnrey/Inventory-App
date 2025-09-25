@@ -13,6 +13,7 @@ export default function Dashboard() {
   const [sortBy, setSortBy] = useState("name");
   const [categoryFilter, setCategoryFilter] = useState("All");
 
+  // Fetch items
   const fetchItems = async () => {
     try {
       const res = await fetch("http://localhost:5000/items");
@@ -28,7 +29,7 @@ export default function Dashboard() {
     fetchItems();
   }, []);
 
-  // Notification auto-clear
+  // Auto-clear notifications
   useEffect(() => {
     if (notification) {
       const timer = setTimeout(() => setNotification(""), 3000);
@@ -45,11 +46,15 @@ export default function Dashboard() {
     return { totalItems, totalStock, lowStock, categories };
   }, [items]);
 
-  // Filtering
+  // Filtering + Sorting
   const filteredItems = useMemo(() => {
     let out = items.filter((i) => {
       const q = search.toLowerCase();
-      if (q && !(i.name.toLowerCase().includes(q) || (i.barcode || "").includes(q))) return false;
+      if (
+        q &&
+        !(i.name.toLowerCase().includes(q) || (i.barcode || "").includes(q))
+      )
+        return false;
       if (categoryFilter !== "All" && i.format !== categoryFilter) return false;
       return true;
     });
@@ -65,8 +70,13 @@ export default function Dashboard() {
   // Export CSV
   function exportCSV() {
     const header = ["id", "name", "stock", "barcode", "format"];
-    const rows = [header.join(","), ...items.map((r) => header.map((c) => r[c]).join(","))];
-    const blob = new Blob([rows.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const rows = [
+      header.join(","),
+      ...items.map((r) => header.map((c) => r[c]).join(",")),
+    ];
+    const blob = new Blob([rows.join("\n")], {
+      type: "text/csv;charset=utf-8;",
+    });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -80,7 +90,9 @@ export default function Dashboard() {
       <div className="p-6">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-800">Sports Inventory Dashboard</h2>
+          <h2 className="text-2xl font-bold text-gray-800">
+            Sports Inventory Dashboard
+          </h2>
           <div className="flex gap-2">
             <button
               onClick={exportCSV}
@@ -102,7 +114,9 @@ export default function Dashboard() {
           <div className="bg-white p-4 rounded-xl shadow flex flex-col">
             <span className="text-sm text-gray-500">Total unique products</span>
             <span className="text-2xl font-semibold">{stats.totalItems}</span>
-            <span className="text-xs text-gray-400 mt-2">Formats: {stats.categories.join(", ")}</span>
+            <span className="text-xs text-gray-400 mt-2">
+              Formats: {stats.categories.join(", ")}
+            </span>
           </div>
           <div className="bg-white p-4 rounded-xl shadow flex flex-col">
             <span className="text-sm text-gray-500">Total units in stock</span>
@@ -110,27 +124,43 @@ export default function Dashboard() {
           </div>
           <div className="bg-white p-4 rounded-xl shadow flex flex-col">
             <span className="text-sm text-gray-500">Low stock alerts (≤ 5)</span>
-            <span className="text-2xl font-semibold text-rose-600">{stats.lowStock}</span>
+            <span className="text-2xl font-semibold text-rose-600">
+              {stats.lowStock}
+            </span>
           </div>
         </div>
 
-        {/* Search + filters */}
-        <div className="bg-white p-4 rounded-xl shadow flex flex-col sm:flex-row gap-3 items-center mb-6">
-          <SearchBar search={search} setSearch={setSearch} />
+        {/* Search + Filters */}
+        <div className="bg-white p-4 rounded-xl shadow flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
+          {/* Search */}
+          <div className="relative flex-1">
+            <span className="absolute left-3 top-2.5 text-gray-400">🔍</span>
+            <input
+              type="text"
+              placeholder="Search items by name or barcode..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-9 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            />
+          </div>
+
+          {/* Category Filter */}
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="px-3 py-2 border rounded-lg"
+            className="px-4 py-2 border rounded-lg bg-gray-50 hover:bg-gray-100 focus:ring-2 focus:ring-blue-500"
           >
             <option>All</option>
             {stats.categories.map((c) => (
               <option key={c}>{c}</option>
             ))}
           </select>
+
+          {/* Sort Filter */}
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="px-3 py-2 border rounded-lg"
+            className="px-4 py-2 border rounded-lg bg-gray-50 hover:bg-gray-100 focus:ring-2 focus:ring-blue-500"
           >
             <option value="name">Sort: Name</option>
             <option value="stock">Sort: Stock (desc)</option>
@@ -161,7 +191,9 @@ export default function Dashboard() {
               setNotification("❌ Edit cancelled");
             }}
             onDelete={async () => {
-              await fetch(`http://localhost:5000/items/${editingItem.id}`, { method: "DELETE" });
+              await fetch(`http://localhost:5000/items/${editingItem.id}`, {
+                method: "DELETE",
+              });
               setEditingItem(null);
               fetchItems();
               setNotification("🗑️ Item deleted");
