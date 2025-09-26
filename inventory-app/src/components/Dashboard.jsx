@@ -8,7 +8,7 @@ export default function Dashboard() {
   const [items, setItems] = useState([]);
   const [search, setSearch] = useState("");
   const [editingItem, setEditingItem] = useState(null);
-  const [editForm, setEditForm] = useState({ name: "", stock: "" });
+  const [editForm, setEditForm] = useState({ name: "", category:"", stock: "", sellingprice: ""});
   const [notification, setNotification] = useState("");
   const [sortBy, setSortBy] = useState("name");
   const [categoryFilter, setCategoryFilter] = useState("All");
@@ -69,7 +69,7 @@ export default function Dashboard() {
 
   // Export CSV
   function exportCSV() {
-    const header = ["id", "name", "stock", "barcode", "format"];
+    const header = ["id", "name", "stock", "category", "sellingprice", "barcode", "format"];
     const rows = [
       header.join(","),
       ...items.map((r) => header.map((c) => r[c]).join(",")),
@@ -172,7 +172,7 @@ export default function Dashboard() {
           items={filteredItems}
           onEdit={(item) => {
             setEditingItem(item);
-            setEditForm({ name: item.name, stock: item.stock.toString() });
+            setEditForm({ name: item.name, category: item.category, stock: item.stock.toString(), sellingprice: item.sellingprice.toString() });
           }}
           onDelete={async (id) => {
             await fetch(`http://localhost:5000/items/${id}`, { method: "DELETE" });

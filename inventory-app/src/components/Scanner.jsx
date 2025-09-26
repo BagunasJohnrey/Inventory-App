@@ -6,6 +6,7 @@ function Scanner() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [productName, setProductName] = useState("");
+  const [productCategory, setProductCategory] = useState("");
   const [stock, setStock] = useState("");
   const [sellingprice, setSellingPrice] = useState("");
   const [items, setItems] = useState([]);
@@ -57,11 +58,13 @@ function Scanner() {
               if (found) {
                 setExistingItem(found);
                 setProductName(found.name);
+                setProductCategory(found.category);
                 setStock(found.stock.toString());
                 setSellingPrice(found.sellingprice.toString());
               } else {
                 setExistingItem(null);
                 setProductName("");
+                setProductCategory("");
                 setStock("");
                 setSellingPrice("");
               }
@@ -94,6 +97,7 @@ function Scanner() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         name: productName,
+        category: productCategory,
         stock: parseInt(stock, 10),
         sellingprice: parseFloat(sellingprice),
         barcode: result.text,
@@ -111,6 +115,7 @@ function Scanner() {
       body: JSON.stringify({
         name: productName,
         stock: parseInt(stock, 10),
+        category: productCategory,
         sellingprice: parseFloat(sellingprice),
         barcode: existingItem.barcode,
         format: existingItem.format,
@@ -120,8 +125,8 @@ function Scanner() {
   };
 
   const handleSaveOrUpdate = async () => {
-    if (!productName || !stock || !sellingprice || !result) {
-      alert("Please fill product name, stock, selling price, and scan a barcode.");
+    if (!productName || !stock || !productCategory || !sellingprice || !result) {
+      alert("Please fill product name, stock, category, selling price, and scan a barcode.");
       return;
     }
     try {
@@ -137,6 +142,7 @@ function Scanner() {
       // reset & resume scanning
       setResult(null);
       setProductName("");
+      setProductCategory("");
       setStock("");
       setSellingPrice("");
       setExistingItem(null);
@@ -208,6 +214,13 @@ function Scanner() {
                 placeholder="Product Name"
                 value={productName}
                 onChange={(e) => setProductName(e.target.value)}
+                className="border p-3 w-full rounded-lg focus:ring focus:ring-blue-200"
+              />
+              <input
+                type="text"
+                placeholder="Product Category"
+                value={productCategory}
+                onChange={(e) => setProductCategory(e.target.value)}
                 className="border p-3 w-full rounded-lg focus:ring focus:ring-blue-200"
               />
               <input

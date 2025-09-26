@@ -23,6 +23,15 @@ export default function EditModal({
           className="w-full border rounded-lg p-2 mb-3 focus:ring-2 focus:ring-blue-500 outline-none"
         />
 
+        {/* Item Category */}
+        <input
+          type="text"
+          value={editForm.category}
+          onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
+          placeholder="Item Category"
+          className="w-full border rounded-lg p-2 mb-3 focus:ring-2 focus:ring-blue-500 outline-none"
+        />
+
         {/* Stock */}
         <input
           type="number"
@@ -30,6 +39,16 @@ export default function EditModal({
           value={editForm.stock}
           onChange={(e) => setEditForm({ ...editForm, stock: e.target.value })}
           placeholder="Stock"
+          className="w-full border rounded-lg p-2 mb-3 focus:ring-2 focus:ring-blue-500 outline-none"
+        />
+
+        {/* Selling Price */}
+        <input
+          type="number"
+          min="0"
+          value={editForm.sellingprice}
+          onChange={(e) => setEditForm({...editForm, sellingprice: e.target.value})}
+          placeholder="Selling Price"
           className="w-full border rounded-lg p-2 mb-3 focus:ring-2 focus:ring-blue-500 outline-none"
         />
 
