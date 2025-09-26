@@ -20,6 +20,7 @@ db.run(`CREATE TABLE IF NOT EXISTS items (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,
   stock INTEGER NOT NULL,
+  sellingprice REAL NOT NULL,
   barcode TEXT NOT NULL,
   format TEXT NOT NULL
 )`);
@@ -34,13 +35,22 @@ app.get("/items", (req, res) => {
 
 // API: Add new item
 app.post("/items", (req, res) => {
-  const { name, stock, barcode, format } = req.body;
+  const { name, stock, sellingprice, barcode, format } = req.body;
+
+  // Basic validation (optional but recommended)
+  if (!name || stock == null || sellingprice == null || !barcode || !format) {
+    return res.status(400).json({ error: "Missing required fields: name, stock, sellingprice, barcode, format" });
+  }
+  if (isNaN(stock) || isNaN(sellingprice)) {
+    return res.status(400).json({ error: "Stock and sellingprice must be valid numbers" });
+  }
+
   db.run(
-    "INSERT INTO items (name, stock, barcode, format) VALUES (?, ?, ?, ?)",
-    [name, stock, barcode, format],
+    "INSERT INTO items (name, stock, sellingprice, barcode, format) VALUES (?, ?, ?, ?, ?)",
+    [name, stock, sellingprice, barcode, format],
     function (err) {
       if (err) return res.status(500).json({ error: err.message });
-      res.json({ id: this.lastID, name, stock, barcode, format });
+      res.json({ id: this.lastID, name, stock, sellingprice, barcode, format });
     }
   );
 });
@@ -48,18 +58,28 @@ app.post("/items", (req, res) => {
 // API: Update item (allow partial updates)
 app.put("/items/:id", (req, res) => {
   const { id } = req.params;
-  const { name, stock } = req.body;
+  const { name, stock, sellingprice } = req.body;
 
-  db.run(
-    "UPDATE items SET name = ?, stock = ? WHERE id = ?",
-    [name, stock, id],
-    function (err) {
-      if (err) return res.status(500).json({ error: err.message });
-      if (this.changes === 0) return res.status(404).json({ error: "Item not found" });
-      res.json({ id, name, stock });
-    }
-  );
+  // First, fetch existing item
+  db.get("SELECT * FROM items WHERE id = ?", [id], (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!row) return res.status(404).json({ error: "Item not found" });
+
+    const updatedName = name ?? row.name;
+    const updatedStock = stock ?? row.stock;
+    const updatedPrice = sellingprice ?? row.sellingprice;
+
+    db.run(
+      "UPDATE items SET name = ?, stock = ?, sellingprice = ? WHERE id = ?",
+      [updatedName, updatedStock, updatedPrice, id],
+      function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ id, name: updatedName, stock: updatedStock, sellingprice: updatedPrice });
+      }
+    );
+  });
 });
+
 
 // ✅ API: Delete item
 app.delete("/items/:id", (req, res) => {

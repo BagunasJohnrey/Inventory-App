@@ -7,6 +7,7 @@ function Scanner() {
   const [error, setError] = useState(null);
   const [productName, setProductName] = useState("");
   const [stock, setStock] = useState("");
+  const [sellingprice, setSellingPrice] = useState("");
   const [items, setItems] = useState([]);
   const [existingItem, setExistingItem] = useState(null);
   const [scanning, setScanning] = useState(true);
@@ -57,10 +58,12 @@ function Scanner() {
                 setExistingItem(found);
                 setProductName(found.name);
                 setStock(found.stock.toString());
+                setSellingPrice(found.sellingprice.toString());
               } else {
                 setExistingItem(null);
                 setProductName("");
                 setStock("");
+                setSellingPrice("");
               }
 
               setScanning(false);
@@ -92,6 +95,7 @@ function Scanner() {
       body: JSON.stringify({
         name: productName,
         stock: parseInt(stock, 10),
+        sellingprice: parseFloat(sellingprice),
         barcode: result.text,
         format: result.format,
       }),
@@ -107,6 +111,7 @@ function Scanner() {
       body: JSON.stringify({
         name: productName,
         stock: parseInt(stock, 10),
+        sellingprice: parseFloat(sellingprice),
         barcode: existingItem.barcode,
         format: existingItem.format,
       }),
@@ -115,8 +120,8 @@ function Scanner() {
   };
 
   const handleSaveOrUpdate = async () => {
-    if (!productName || !stock || !result) {
-      alert("Please fill product name, stock, and scan a barcode.");
+    if (!productName || !stock || !sellingprice || !result) {
+      alert("Please fill product name, stock, selling price, and scan a barcode.");
       return;
     }
     try {
@@ -133,6 +138,7 @@ function Scanner() {
       setResult(null);
       setProductName("");
       setStock("");
+      setSellingPrice("");
       setExistingItem(null);
       setScanning(true);
     } catch (err) {
@@ -209,6 +215,13 @@ function Scanner() {
                 placeholder="Stock Quantity"
                 value={stock}
                 onChange={(e) => setStock(e.target.value)}
+                className="border p-3 w-full rounded-lg focus:ring focus:ring-blue-200"
+              />
+              <input
+                type="number"
+                placeholder="Selling Price"
+                value={sellingprice}
+                onChange={(e) => setSellingPrice(e.target.value)}
                 className="border p-3 w-full rounded-lg focus:ring focus:ring-blue-200"
               />
 
