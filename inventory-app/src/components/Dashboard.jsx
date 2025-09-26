@@ -27,7 +27,7 @@ export default function Dashboard() {
   const [items, setItems] = useState([]);
   const [search, setSearch] = useState("");
   const [editingItem, setEditingItem] = useState(null);
-  const [editForm, setEditForm] = useState({ name: "", category:"", stock: "", sellingprice: "" });
+  const [editForm, setEditForm] = useState({ name: "", category:"", stock: "", costprice: "", sellingprice: "" });
   const [notification, setNotification] = useState("");
   const [sortBy, setSortBy] = useState("name");
   const [categoryFilter, setCategoryFilter] = useState("All");
@@ -89,8 +89,8 @@ function exportCSV() {
     return;
   }
 
-  const headers = ["id", "name", "stock", "category", "sellingprice", "barcode"];
-  const headerLabels = ["ID", "Product Name", "Stock", "Category", "Selling Price", "Barcode"];
+  const headers = ["id", "name", "stock", "category", "costprice", "sellingprice", "barcode"];
+  const headerLabels = ["ID", "Product Name", "Stock", "Category", "Cost Price", "Selling Price", "Barcode"];
 
   // Generate CSV rows
   const csvRows = [
@@ -264,6 +264,7 @@ function exportCSV() {
               name: item.name,
               category: item.category,
               stock: item.stock.toString(),
+              costprice: item.costprice.toString(),
               sellingprice: item.sellingprice.toString(),
             });
           }}

@@ -8,6 +8,7 @@ export default function Table({ items, onEdit, onDelete }) {
             <th className="px-4 py-3">Name</th>
             <th className="px-4 py-3 text-center">Category</th>
             <th className="px-4 py-3 text-center">Stock</th>
+            <th className="px-4 py-3 text-center">Cost Price</th>
             <th className="px-4 py-3 text-center">Selling Price</th>
             <th className="px-4 py-3 text-center">Barcode</th>
             <th className="px-4 py-3 text-center">Actions</th>
@@ -20,6 +21,7 @@ export default function Table({ items, onEdit, onDelete }) {
               <td className="px-4 py-2 border">{item.name}</td>
               <td className="px-4 py-2 border text-center">{item.category}</td>
               <td className="px-4 py-2 border text-center">{item.stock}</td>
+              <td className="px-4 py-2 border text-center"> Php {item.costprice}</td>
               <td className="px-4 py-2 border text-center"> Php {item.sellingprice}</td>
               <td className="px-4 py-2 border">{item.barcode}</td>
               <td className="px-4 py-2 border text-center space-x-2">

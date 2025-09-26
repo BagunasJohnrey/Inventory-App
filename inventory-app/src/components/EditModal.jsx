@@ -42,6 +42,16 @@ export default function EditModal({
           className="w-full border rounded-lg p-2 mb-3 focus:ring-2 focus:ring-blue-500 outline-none"
         />
 
+        {/* Cost Price */}
+        <input
+          type="number"
+          min="0"
+          value={editForm.costprice}
+          onChange={(e) => setEditForm({...editForm, costprice: e.target.value})}
+          placeholder="Cost Price"
+          className="w-full border rounded-lg p-2 mb-3 focus:ring-2 focus:ring-blue-500 outline-none"
+        />
+
         {/* Selling Price */}
         <input
           type="number"

@@ -8,6 +8,7 @@ function Scanner() {
   const [productName, setProductName] = useState("");
   const [productCategory, setProductCategory] = useState("");
   const [stock, setStock] = useState("");
+  const [costprice, setCostPrice] = useState("");
   const [sellingprice, setSellingPrice] = useState("");
   const [items, setItems] = useState([]);
   const [existingItem, setExistingItem] = useState(null);
@@ -66,12 +67,14 @@ function Scanner() {
                 setProductName(found.name);
                 setProductCategory(found.category);
                 setStock(found.stock.toString());
+                setCostPrice(found.costprice.toString());
                 setSellingPrice(found.sellingprice.toString());
               } else {
                 setExistingItem(null);
                 setProductName("");
                 setProductCategory("");
                 setStock("");
+                setCostPrice("");
                 setSellingPrice("");
               }
 
@@ -138,6 +141,7 @@ function Scanner() {
         name: productName,
         category: productCategory,
         stock: parseInt(stock, 10),
+        costprice: parseFloat(costprice),
         sellingprice: parseFloat(sellingprice),
         barcode: result.text,
       }),
@@ -153,6 +157,7 @@ function Scanner() {
         name: productName,
         stock: parseInt(stock, 10),
         category: productCategory,
+        costprice: parseFloat(costprice),
         sellingprice: parseFloat(sellingprice),
         barcode: existingItem.barcode,
       }),
@@ -161,7 +166,7 @@ function Scanner() {
   };
 
   const handleSaveOrUpdate = async () => {
-    if (!productName || !stock || !productCategory || !sellingprice || !result) {
+    if (!productName || !stock || !productCategory || !costprice || !sellingprice || !result) {
       alert("Please fill all fields and scan a barcode.");
       return;
     }
@@ -180,6 +185,7 @@ function Scanner() {
       setProductName("");
       setProductCategory("");
       setStock("");
+      setCostPrice("");
       setSellingPrice("");
       setExistingItem(null);
     } catch (err) {
@@ -261,6 +267,13 @@ function Scanner() {
                 placeholder="Stock Quantity"
                 value={stock}
                 onChange={(e) => setStock(e.target.value)}
+                className="border p-3 w-full rounded-lg focus:ring focus:ring-blue-200"
+              />
+              <input
+                type="number"
+                placeholder="Cost Price"
+                value={costprice}
+                onChange={(e) => setCostPrice(e.target.value)}
                 className="border p-3 w-full rounded-lg focus:ring focus:ring-blue-200"
               />
               <input

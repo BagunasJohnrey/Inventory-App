@@ -21,6 +21,7 @@ db.run(`CREATE TABLE IF NOT EXISTS items (
   name TEXT NOT NULL,
   category TEXT NOT NULL,
   stock INTEGER NOT NULL,
+  costprice REAL NOT NULL,
   sellingprice REAL NOT NULL, 
   barcode TEXT NOT NULL
 )`);
@@ -35,22 +36,22 @@ app.get("/items", (req, res) => {
 
 // API: Add new item
 app.post("/items", (req, res) => {
-  const { name, stock, category, sellingprice, barcode } = req.body;
+  const { name, stock, category, costprice, sellingprice, barcode } = req.body;
 
   // Basic validation
-  if (!name || stock == null || category == null || sellingprice == null || !barcode) {
-    return res.status(400).json({ error: "Missing required fields: name, stock, sellingprice, barcode" });
+  if (!name || stock == null || category == null || costprice == null || sellingprice == null || !barcode) {
+    return res.status(400).json({ error: "Missing required fields: name, stock, costprice, sellingprice, barcode" });
   }
-  if (isNaN(stock) || isNaN(sellingprice)) {
-    return res.status(400).json({ error: "Stock and sellingprice must be valid numbers" });
+  if (isNaN(stock) || isNaN(costprice) || isNaN(sellingprice)) {
+    return res.status(400).json({ error: "Stock, costprice, and sellingprice must be valid numbers" });
   }
 
   db.run(
-    "INSERT INTO items (name, stock, category, sellingprice, barcode) VALUES (?, ?, ?, ?, ?)",
-    [name, stock, category, sellingprice, barcode],
+    "INSERT INTO items (name, stock, category, costprice, sellingprice, barcode) VALUES (?, ?, ?, ?, ?, ?)",
+    [name, stock, category, costprice, sellingprice, barcode],
     function (err) {
       if (err) return res.status(500).json({ error: err.message });
-      res.json({ id: this.lastID, name, stock, category, sellingprice, barcode });
+      res.json({ id: this.lastID, name, stock, category, costprice, sellingprice, barcode });
     }
   );
 });
@@ -58,7 +59,7 @@ app.post("/items", (req, res) => {
 // API: Update item (allow partial updates)
 app.put("/items/:id", (req, res) => {
   const { id } = req.params;
-  const { name, stock, category, sellingprice } = req.body;
+  const { name, stock, category, costprice, sellingprice } = req.body;
 
   db.get("SELECT * FROM items WHERE id = ?", [id], (err, row) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -67,14 +68,15 @@ app.put("/items/:id", (req, res) => {
     const updatedName = name ?? row.name;
     const updatedStock = stock ?? row.stock;
     const updatedCategory = category ?? row.category;
-    const updatedPrice = sellingprice ?? row.sellingprice;
+    const updatedCostPrice = costprice ?? row.costprice;
+    const updatedSellingPrice = sellingprice ?? row.sellingprice;
 
     db.run(
-      "UPDATE items SET name = ?, stock = ?, category = ?, sellingprice = ? WHERE id = ?",
-      [updatedName, updatedStock, updatedCategory, updatedPrice, id],
+      "UPDATE items SET name = ?, stock = ?, category = ?, costprice = ?, sellingprice = ? WHERE id = ?",
+      [updatedName, updatedStock, updatedCategory, updatedCostPrice, updatedSellingPrice, id],
       function (err) {
         if (err) return res.status(500).json({ error: err.message });
-        res.json({ id, name: updatedName, stock: updatedStock, category: updatedCategory, sellingprice: updatedPrice });
+        res.json({ id, name: updatedName, stock: updatedStock, category: updatedCategory, costprice: updatedCostPrice, sellingprice: updatedSellingPrice });
       }
     );
   });
