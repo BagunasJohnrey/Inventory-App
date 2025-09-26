@@ -1,11 +1,13 @@
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 import { HiOutlineHome, HiOutlineChartBar, HiOutlineCamera } from "react-icons/hi";
+import { MdPointOfSale } from "react-icons/md"; 
 
 const navItems = [
   { label: "Dashboard", path: "/", icon: <HiOutlineHome /> },
   { label: "Reports", path: "/reports", icon: <HiOutlineChartBar /> },
   { label: "Scanner", path: "/scanner", icon: <HiOutlineCamera /> },
+  { label: "POS", path: "/pos", icon: <MdPointOfSale />},
 ];
 
 export default function Layout({ children }) {

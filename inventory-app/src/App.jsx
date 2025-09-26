@@ -4,6 +4,7 @@ import Dashboard from "./components/Dashboard";
 import Scanner from "./components/Scanner";
 import Reports from "./components/Reports";
 import Search from "./components/SearchBar";
+import Pos from "./components/Pos";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
           <Route path="/scanner" element={<Scanner />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/search" element={<Search />} />
+          <Route path="/pos" element={<Pos />} /> 
         </Routes>
       </Layout>
     </Router>
