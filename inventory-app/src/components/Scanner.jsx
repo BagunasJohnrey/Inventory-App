@@ -57,7 +57,7 @@ function Scanner() {
           videoRef.current,
           (res, err) => {
             if (res) {
-              const scanned = { text: res.text, format: res.format };
+              const scanned = { text: res.text };
               setResult(scanned);
 
               const found = items.find((item) => item.barcode === scanned.text);
@@ -75,7 +75,7 @@ function Scanner() {
                 setSellingPrice("");
               }
 
-              // Freeze frame by drawing current video frame to canvas
+              // Freeze frame
               if (videoRef.current && canvasRef.current) {
                 const ctx = canvasRef.current.getContext("2d");
                 canvasRef.current.width = videoRef.current.videoWidth;
@@ -83,10 +83,8 @@ function Scanner() {
                 ctx.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
               }
 
-              // Stop decoding
+              // Stop decoding & camera
               if (codeReaderRef.current) codeReaderRef.current.reset();
-
-              // Stop camera tracks AFTER drawing the frame
               if (streamRef.current) {
                 streamRef.current.getTracks().forEach((track) => track.stop());
                 streamRef.current = null;
@@ -142,7 +140,6 @@ function Scanner() {
         stock: parseInt(stock, 10),
         sellingprice: parseFloat(sellingprice),
         barcode: result.text,
-        format: result.format,
       }),
     });
     return res.json();
@@ -158,7 +155,6 @@ function Scanner() {
         category: productCategory,
         sellingprice: parseFloat(sellingprice),
         barcode: existingItem.barcode,
-        format: existingItem.format,
       }),
     });
     return res.json();
@@ -179,7 +175,7 @@ function Scanner() {
       }
       await fetchItems();
 
-      // reset form & allow scanning again
+      // reset form
       setResult(null);
       setProductName("");
       setProductCategory("");
@@ -195,7 +191,6 @@ function Scanner() {
   return (
     <div className="min-h-screen bg-gray-100 p-6 flex items-center justify-center">
       <div className="bg-white p-6 rounded-2xl shadow-lg w-full max-w-lg space-y-6">
-        {/* Header */}
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold text-gray-800">📷 Barcode Scanner</h2>
           <button
@@ -206,14 +201,12 @@ function Scanner() {
           </button>
         </div>
 
-        {/* Error Message */}
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 p-3 rounded-lg">
             <p className="text-sm">{error}</p>
           </div>
         )}
 
-        {/* Camera Feed / Canvas */}
         <div className="relative bg-black rounded-xl overflow-hidden">
           <video
             ref={videoRef}
@@ -225,7 +218,6 @@ function Scanner() {
             ref={canvasRef}
             className={`w-full h-64 object-cover ${result ? "" : "hidden"}`}
           />
-          {/* Red overlay box */}
           {scanning && (
             <div className="absolute inset-0 pointer-events-none">
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-32 border-4 border-red-500 rounded-lg"></div>
@@ -233,7 +225,6 @@ function Scanner() {
           )}
         </div>
 
-        {/* Start button */}
         {!scanning && !result && (
           <button
             onClick={() => setScanning(true)}
@@ -243,12 +234,10 @@ function Scanner() {
           </button>
         )}
 
-        {/* Result and form */}
         {result && (
           <>
             <div className="bg-green-50 border border-green-400 text-green-700 p-4 rounded-xl">
               <h3 className="font-semibold text-lg mb-2">✅ Item Detected</h3>
-              <p><span className="font-medium">Format:</span> {result.format}</p>
               <p><span className="font-medium">Data:</span> {result.text}</p>
             </div>
 

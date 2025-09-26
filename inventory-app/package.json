@@ -17,6 +17,7 @@
     "react-dom": "^19.1.1",
     "react-qr-barcode-scanner": "^2.1.14",
     "react-router-dom": "^7.9.2",
+    "recharts": "^3.2.1",
     "sqlite3": "^5.1.7"
   },
   "devDependencies": {
