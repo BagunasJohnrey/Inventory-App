@@ -22,7 +22,6 @@ export default function Reports() {
   const lowStock = items.filter((i) => i.stock < 5);
 
   return (
-    <Layout>
       <div className="p-6">
         <h2 className="text-2xl font-bold mb-6">📊 Reports</h2>
 
@@ -58,6 +57,5 @@ export default function Reports() {
           )}
         </div>
       </div>
-    </Layout>
   );
 }

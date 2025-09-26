@@ -3,6 +3,7 @@ import Layout from "../components/Layout";
 import Table from "../components/Table";
 import EditModal from "../components/EditModal";
 
+
 // Recharts imports
 import {
   PieChart,
@@ -138,7 +139,6 @@ function exportCSV() {
   }, [items]);
 
   return (
-    <Layout>
       <div className="p-6">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
@@ -314,6 +314,5 @@ function exportCSV() {
           </div>
         )}
       </div>
-    </Layout>
   );
 }
