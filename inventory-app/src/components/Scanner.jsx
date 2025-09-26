@@ -11,10 +11,12 @@ function Scanner() {
   const [sellingprice, setSellingPrice] = useState("");
   const [items, setItems] = useState([]);
   const [existingItem, setExistingItem] = useState(null);
-  const [scanning, setScanning] = useState(true);
+  const [scanning, setScanning] = useState(false);
 
   const videoRef = useRef(null);
+  const canvasRef = useRef(null);
   const codeReaderRef = useRef(null);
+  const streamRef = useRef(null);
   const navigate = useNavigate();
 
   // Fetch items from DB
@@ -31,15 +33,19 @@ function Scanner() {
   useEffect(() => {
     codeReaderRef.current = new BrowserMultiFormatReader();
     fetchItems();
+  }, []);
+
+  useEffect(() => {
+    if (!scanning) return;
 
     const startScanning = async () => {
       try {
         setError(null);
-        if (!scanning) return;
 
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: "environment" },
         });
+        streamRef.current = stream;
 
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
@@ -69,9 +75,26 @@ function Scanner() {
                 setSellingPrice("");
               }
 
+              // Freeze frame by drawing current video frame to canvas
+              if (videoRef.current && canvasRef.current) {
+                const ctx = canvasRef.current.getContext("2d");
+                canvasRef.current.width = videoRef.current.videoWidth;
+                canvasRef.current.height = videoRef.current.videoHeight;
+                ctx.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
+              }
+
+              // Stop decoding
+              if (codeReaderRef.current) codeReaderRef.current.reset();
+
+              // Stop camera tracks AFTER drawing the frame
+              if (streamRef.current) {
+                streamRef.current.getTracks().forEach((track) => track.stop());
+                streamRef.current = null;
+              }
+
               setScanning(false);
-              codeReaderRef.current.reset();
             }
+
             if (err && err.name !== "NotFoundException") {
               console.error("Scanning error:", err);
             }
@@ -80,6 +103,7 @@ function Scanner() {
       } catch (err) {
         console.error("Camera error:", err);
         setError(err.message || "Failed to access camera.");
+        setScanning(false);
       }
     };
 
@@ -87,10 +111,27 @@ function Scanner() {
 
     return () => {
       if (codeReaderRef.current) codeReaderRef.current.reset();
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
+      }
     };
   }, [scanning, items]);
 
-  // Save new item
+  const handleCancel = () => {
+    setScanning(false);
+    setResult(null);
+    setExistingItem(null);
+    setProductName("");
+    setProductCategory("");
+    setStock("");
+    setSellingPrice("");
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+  };
+
   const saveItem = async () => {
     const res = await fetch("http://localhost:5000/items", {
       method: "POST",
@@ -107,7 +148,6 @@ function Scanner() {
     return res.json();
   };
 
-  // Update existing item
   const updateItem = async () => {
     const res = await fetch(`http://localhost:5000/items/${existingItem.id}`, {
       method: "PUT",
@@ -126,7 +166,7 @@ function Scanner() {
 
   const handleSaveOrUpdate = async () => {
     if (!productName || !stock || !productCategory || !sellingprice || !result) {
-      alert("Please fill product name, stock, category, selling price, and scan a barcode.");
+      alert("Please fill all fields and scan a barcode.");
       return;
     }
     try {
@@ -139,14 +179,13 @@ function Scanner() {
       }
       await fetchItems();
 
-      // reset & resume scanning
+      // reset form & allow scanning again
       setResult(null);
       setProductName("");
       setProductCategory("");
       setStock("");
       setSellingPrice("");
       setExistingItem(null);
-      setScanning(true);
     } catch (err) {
       console.error("Error saving/updating item:", err);
       alert("Failed to save/update item.");
@@ -158,9 +197,7 @@ function Scanner() {
       <div className="bg-white p-6 rounded-2xl shadow-lg w-full max-w-lg space-y-6">
         {/* Header */}
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-gray-800">
-            📷 Barcode Scanner
-          </h2>
+          <h2 className="text-2xl font-bold text-gray-800">📷 Barcode Scanner</h2>
           <button
             onClick={() => navigate("/")}
             className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition"
@@ -176,38 +213,45 @@ function Scanner() {
           </div>
         )}
 
-        {/* Camera Feed */}
+        {/* Camera Feed / Canvas */}
         <div className="relative bg-black rounded-xl overflow-hidden">
           <video
             ref={videoRef}
-            className="w-full h-64 object-cover"
+            className={`w-full h-64 object-cover ${result ? "hidden" : ""}`}
             playsInline
             muted
           />
+          <canvas
+            ref={canvasRef}
+            className={`w-full h-64 object-cover ${result ? "" : "hidden"}`}
+          />
+          {/* Red overlay box */}
           {scanning && (
-            <div className="absolute inset-0 border-2 border-blue-400 rounded-xl pointer-events-none">
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-32 border-2 border-red-400 rounded-lg"></div>
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-32 border-4 border-red-500 rounded-lg"></div>
             </div>
           )}
         </div>
 
-        {/* Result */}
+        {/* Start button */}
+        {!scanning && !result && (
+          <button
+            onClick={() => setScanning(true)}
+            className="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg w-full"
+          >
+            Start Scanning
+          </button>
+        )}
+
+        {/* Result and form */}
         {result && (
-          <div className="space-y-4">
+          <>
             <div className="bg-green-50 border border-green-400 text-green-700 p-4 rounded-xl">
               <h3 className="font-semibold text-lg mb-2">✅ Item Detected</h3>
-              <p>
-                <span className="font-medium">Format:</span> {result.format}
-              </p>
-              <p>
-                <span className="font-medium">Data:</span>
-              </p>
-              <div className="bg-white p-3 rounded border break-all font-mono text-sm">
-                {result.text}
-              </div>
+              <p><span className="font-medium">Format:</span> {result.format}</p>
+              <p><span className="font-medium">Data:</span> {result.text}</p>
             </div>
 
-            {/* Form */}
             <div className="space-y-3">
               <input
                 type="text"
@@ -248,8 +292,15 @@ function Scanner() {
               >
                 {existingItem ? "Update Item" : "Save Item"}
               </button>
+
+              <button
+                onClick={handleCancel}
+                className="bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-lg w-full"
+              >
+                Cancel / Reset
+              </button>
             </div>
-          </div>
+          </>
         )}
       </div>
     </div>
